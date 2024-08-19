@@ -1,19 +1,18 @@
 import { createBrowserRouter } from "react-router-dom";
-import VirtualList from "../pages/virtualList";
 import App from "../App";
+import Demo from "@/pages/demo/index.tsx";
 
-const routes = [
+const routes = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
       {
-        path: "virtual_list",
-        title: "Virtual List",
-        element: <VirtualList />,
+        path: "demo",
+        element: <Demo />,
       },
     ],
   },
-];
+]);
 
-export default createBrowserRouter(routes);
+export default routes;
