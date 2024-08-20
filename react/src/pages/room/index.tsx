@@ -1,35 +1,39 @@
 import { useState, useRef } from "react";
 import io, { Socket } from "socket.io-client";
 import "./index.scss";
-export default function Demo() {
+export default function Room() {
   const [inputValue, setInputValue] = useState<string>("");
   const [messageList, setMessageList] = useState<{ message: string }[]>([]);
   const socketRef = useRef<Socket | null>(null);
+  const room = useRef<string>("");
 
-  function connect() {
+  function joinRoom(roomName: string) {
     socketRef.current = io("ws://localhost:3000");
     socketRef.current.on("connect", function () {
-      socketRef.current!.on(
-        "chatMessage",
-        function (data: { message: string }) {
+      if (socketRef.current) {
+        socketRef.current.emit("joinRoom", { roomName }, () => {
+          console.log(roomName, 777);
+          room.current = roomName;
+        });
+        socketRef.current.on("roomMessage", (data) => {
           setMessageList((messageList) => [
             ...messageList,
             { message: data.message },
           ]);
-        }
-      );
+        });
+      }
     });
   }
 
   function disconnect() {
     if (socketRef.current) {
-      socketRef.current.disconnect();
+      socketRef.current.emit("leaveRoom", { roomName: room });
     }
   }
 
   const sendMessage = () => {
     if (socketRef.current) {
-      socketRef.current.emit("userMessage", {
+      socketRef.current.emit("sendMessage", {
         id: socketRef.current.id,
         message: inputValue,
       });
@@ -45,11 +49,14 @@ export default function Demo() {
             {e.message}
           </p>
         ))}
-        <button className="button" onClick={connect}>
-          上线
+        <button className="button" onClick={() => joinRoom("roomA")}>
+          加入房间A
+        </button>
+        <button className="button" onClick={() => joinRoom("roomB")}>
+          加入房间B
         </button>
         <button className="button" onClick={disconnect}>
-          下线
+          离开房间
         </button>
       </div>
       <div className="input-wrap">

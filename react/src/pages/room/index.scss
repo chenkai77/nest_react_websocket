@@ -16,6 +16,9 @@
       & + .button {
         top: 50px;
       }
+      & + .button + .button {
+        top: 80px;
+      }
     }
   }
   .input-wrap {
