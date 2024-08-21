@@ -24,9 +24,9 @@ export class RoomWSGateway {
     @ConnectedSocket() client: Socket,
   ) {
     client.join(data.room);
-    this.server
-      .to(data.room)
-      .emit('roomMessage', { message: '欢迎' + client.id + '用户加入' });
+    this.server.to(data.room).emit('roomMessage', {
+      message: '欢迎' + client.id + '用户加入' + data.room,
+    });
   }
 
   @SubscribeMessage('leaveRoom')
@@ -37,12 +37,14 @@ export class RoomWSGateway {
     client.leave(data.room);
     this.server
       .to(data.room)
-      .emit('roomMessage', { message: client.id + '用户离开了' });
+      .emit('roomMessage', { message: client.id + '用户离开了' + data.room });
   }
 
   @SubscribeMessage('sendMessage')
-  sendMessage(@MessageBody() data: { id: string; message: string }) {
-    this.server.emit('roomMessage', {
+  sendMessage(
+    @MessageBody() data: { room: string; id: string; message: string },
+  ) {
+    this.server.to(data.room).emit('roomMessage', {
       message: data.id + ': ' + data.message,
     });
   }

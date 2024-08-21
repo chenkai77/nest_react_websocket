@@ -11,10 +11,8 @@ export default function Room() {
     socketRef.current = io("ws://localhost:3000");
     socketRef.current.on("connect", function () {
       if (socketRef.current) {
-        socketRef.current.emit("joinRoom", { roomName }, () => {
-          console.log(roomName, 777);
-          room.current = roomName;
-        });
+        socketRef.current.emit("joinRoom", { room: roomName });
+        room.current = roomName;
         socketRef.current.on("roomMessage", (data) => {
           setMessageList((messageList) => [
             ...messageList,
@@ -27,13 +25,14 @@ export default function Room() {
 
   function disconnect() {
     if (socketRef.current) {
-      socketRef.current.emit("leaveRoom", { roomName: room });
+      socketRef.current.emit("leaveRoom", { room: room.current });
     }
   }
 
   const sendMessage = () => {
     if (socketRef.current) {
       socketRef.current.emit("sendMessage", {
+        room: room.current,
         id: socketRef.current.id,
         message: inputValue,
       });
